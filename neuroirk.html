@@ -1,0 +1,1002 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NeuroIrk — DeepSeek style</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            height: 100vh;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100%;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.92);
+            position: relative;
+        }
+
+        .dark .app-container {
+            background-color: rgba(30, 30, 35, 0.95);
+        }
+
+        /* ===== БОКОВАЯ ПАНЕЛЬ ===== */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 85%;
+            max-width: 320px;
+            background: #ffffff;
+            z-index: 1000;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .dark .sidebar {
+            background: #1e1e24;
+            border-right: 1px solid #2a2a32;
+        }
+
+        .sidebar.open {
+            transform: translateX(0);
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+            backdrop-filter: blur(2px);
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid #eaeaea;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .dark .sidebar-header {
+            border-bottom: 1px solid #2a2a32;
+        }
+
+        .sidebar-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e1e24;
+        }
+
+        .dark .sidebar-title {
+            color: #f0f0f4;
+        }
+
+        /* ЕДИНАЯ КНОПКА С ГЛУБОКОЙ ИКОНКОЙ */
+        .sidebar-menu-btn {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            color: #1e293b;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            transition: background 0.2s;
+        }
+
+        .dark .sidebar-menu-btn {
+            background: #2a2a32;
+            border: 1px solid #3a3a4a;
+            color: #f0f0f4;
+        }
+
+        .sidebar-menu-btn:active {
+            background: #e2e8f0;
+        }
+
+        .dark .sidebar-menu-btn:active {
+            background: #3a3a4a;
+        }
+
+        .ds-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+        }
+
+        .new-chat-button {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            margin: 12px 16px;
+            border-radius: 8px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            color: #1e293b;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .dark .new-chat-button {
+            background: #2a2a32;
+            border: 1px solid #3a3a4a;
+            color: #f0f0f4;
+        }
+
+        .new-chat-button:active {
+            background: #e2e8f0;
+        }
+
+        .dark .new-chat-button:active {
+            background: #3a3a4a;
+        }
+
+        .settings-section {
+            padding: 16px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .dark .settings-section {
+            border-bottom: 1px solid #2a2a32;
+        }
+
+        .settings-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .dark .settings-title {
+            color: #9ca3af;
+        }
+
+        .theme-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .theme-btn {
+            flex: 1;
+            padding: 8px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #1e293b;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .dark .theme-btn {
+            background: #2a2a32;
+            border: 1px solid #3a3a4a;
+            color: #f0f0f4;
+        }
+
+        .theme-btn.active {
+            background: #0f172a;
+            color: white;
+            border-color: #0f172a;
+        }
+
+        .dark .theme-btn.active {
+            background: #3a3a4a;
+            border-color: #4a4a5a;
+        }
+
+        .language-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .lang-btn {
+            padding: 10px 12px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #1e293b;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .dark .lang-btn {
+            background: #2a2a32;
+            border: 1px solid #3a3a4a;
+            color: #f0f0f4;
+        }
+
+        .lang-btn.active {
+            background: #0f172a;
+            color: white;
+            border-color: #0f172a;
+        }
+
+        .dark .lang-btn.active {
+            background: #3a3a4a;
+            border-color: #4a4a5a;
+        }
+
+        .chat-history {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 16px;
+        }
+
+        .history-item {
+            padding: 12px;
+            margin-bottom: 6px;
+            background: #f8fafc;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #1e293b;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .dark .history-item {
+            background: #2a2a32;
+            color: #f0f0f4;
+        }
+
+        .history-item:active {
+            background: #e2e8f0;
+        }
+
+        .dark .history-item:active {
+            background: #3a3a4a;
+        }
+
+        .history-date {
+            font-size: 11px;
+            color: #64748b;
+            margin-left: 8px;
+            white-space: nowrap;
+        }
+
+        .dark .history-date {
+            color: #9ca3af;
+        }
+
+        .delete-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            background: transparent;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .delete-btn:active {
+            background: rgba(0,0,0,0.1);
+            color: #dc2626;
+        }
+
+        .dark .delete-btn:active {
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* ===== ОСНОВНОЙ КОНТЕНТ ===== */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+        }
+
+        .main-header {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .dark .main-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .main-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-left: 12px;
+        }
+
+        .dark .main-title {
+            color: #f0f0f4;
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message {
+            display: flex;
+            gap: 12px;
+            padding: 8px 0;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        .user-avatar {
+            background: #0f172a;
+            color: white;
+        }
+
+        .dark .user-avatar {
+            background: #3a3a4a;
+        }
+
+        .bot-avatar {
+            background: #334155;
+            color: white;
+        }
+
+        .dark .bot-avatar {
+            background: #4a4a5a;
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-text {
+            font-size: 15px;
+            line-height: 1.5;
+            color: #1e293b;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .dark .message-text {
+            color: #f0f0f4;
+        }
+
+        .input-container {
+            padding: 10px 16px 14px 16px;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .dark .input-container {
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .input-area {
+            flex: 1;
+            padding: 12px 16px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+            font-size: 15px;
+            line-height: 1.4;
+            color: #1e293b;
+            resize: none;
+            min-height: 48px;
+            max-height: 120px;
+            outline: none;
+        }
+
+        .dark .input-area {
+            background: #2a2a32;
+            border: 1px solid #3a3a4a;
+            color: #f0f0f4;
+        }
+
+        .input-area:focus {
+            border-color: #0f172a;
+        }
+
+        .send-button {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #ffffff;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        .dark .send-button {
+            background: #2a2a32;
+            color: #f0f0f4;
+            border: 1px solid #3a3a4a;
+        }
+
+        .send-button:active {
+            background: #f1f5f9;
+        }
+
+        .dark .send-button:active {
+            background: #3a3a4a;
+        }
+
+        .send-button.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 0;
+        }
+
+        .loading-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .loading-dots span {
+            width: 7px;
+            height: 7px;
+            background: #64748b;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite;
+        }
+
+        .dark .loading-dots span {
+            background: #9ca3af;
+        }
+
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes bounce {
+            0%,80%,100% { transform: translateY(0); }
+            40% { transform: translateY(-6px); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 8px 16px 12px;
+            font-size: 11px;
+            color: #64748b;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .dark .footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            color: #9ca3af;
+        }
+
+        .delete-confirm {
+            position: fixed;
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 16px;
+            z-index: 2000;
+            width: 200px;
+            border: 1px solid #eaeaea;
+        }
+
+        .dark .delete-confirm {
+            background: #2a2a32;
+            border-color: #3a3a4a;
+            color: #f0f0f4;
+        }
+
+        .delete-confirm p {
+            margin-bottom: 16px;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .delete-confirm-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .delete-confirm-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .delete-confirm-yes {
+            background: #dc2626;
+            color: white;
+        }
+
+        .delete-confirm-no {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .dark .delete-confirm-no {
+            background: #3a3a4a;
+            color: #f0f0f4;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="overlay" id="overlay"></div>
+
+        <!-- Боковая панель -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">NeuroIrk</div>
+                <!-- КНОПКА ЗАКРЫТИЯ (такая же глубокая иконка) -->
+                <div class="sidebar-menu-btn" id="closeSidebarBtn">
+                    <div class="ds-icon">
+                        <svg width="18" height="18" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M9.67272 0.522827C10.8339 0.522827 11.76 0.522701 12.4963 0.60248C13.2453 0.683644 13.8789 0.854235 14.4264 1.25196C14.7504 1.48738 15.0355 1.77246 15.2709 2.09648C15.6686 2.64392 15.8392 3.27756 15.9204 4.02653C16.0002 4.76289 16 5.68894 16 6.85013V9.14985C16 10.311 16.0002 11.2371 15.9204 11.9734C15.8392 12.7224 15.6686 13.3561 15.2709 13.9035C15.0355 14.2275 14.7504 14.5126 14.4264 14.748C13.8789 15.1457 13.2453 15.3163 12.4963 15.3975C11.76 15.4773 10.8339 15.4772 9.67272 15.4772H6.3273C5.16611 15.4772 4.24006 15.4773 3.50371 15.3975C2.75474 15.3163 2.1211 15.1457 1.57366 14.748C1.24963 14.5126 0.964549 14.2275 0.729131 13.9035C0.331407 13.3561 0.160817 12.7224 0.0796529 11.9734C-0.000126137 11.2371 1.25338e-09 10.311 1.25338e-09 9.14985V6.85013C1.25329e-09 5.68894 -0.000126137 4.76289 0.0796529 4.02653C0.160817 3.27756 0.331407 2.64392 0.729131 2.09648C0.964549 1.77246 1.24963 1.48738 1.57366 1.25196C2.1211 0.854235 2.75474 0.683644 3.50371 0.60248C4.24006 0.522701 5.16611 0.522827 6.3273 0.522827H9.67272ZM5.54303 1.88714V14.1118C5.78636 14.1128 6.04709 14.1169 6.3273 14.1169H9.67272C10.8639 14.1169 11.7032 14.1164 12.3493 14.0465C12.9824 13.9779 13.3497 13.8494 13.6268 13.6482C13.8354 13.4966 14.0195 13.3125 14.1711 13.1039C14.3723 12.8268 14.5007 12.4595 14.5693 11.8264C14.6393 11.1803 14.6398 10.341 14.6398 9.14985V6.85013C14.6398 5.65895 14.6393 4.81965 14.5693 4.17359C14.5007 3.54047 14.3723 3.17317 14.1711 2.89608C14.0195 2.68746 13.8354 2.50335 13.6268 2.35178C13.3497 2.15059 12.9824 2.02211 12.3493 1.95352C11.7032 1.88356 10.8639 1.88305 9.67272 1.88305H6.3273C6.04709 1.88305 5.78636 1.88618 5.54303 1.88714ZM4.1828 1.91165C3.99125 1.92158 3.8148 1.93575 3.65076 1.95352C3.01764 2.02211 2.65034 2.15059 2.37325 2.35178C2.16463 2.50335 1.98052 2.68746 1.82895 2.89608C1.62776 3.17317 1.49928 3.54047 1.43069 4.17359C1.36074 4.81965 1.36023 5.65895 1.36023 6.85013V9.14985C1.36023 10.341 1.36074 11.1803 1.43069 11.8264C1.49928 12.4595 1.62776 12.8268 1.82895 13.1039C1.98052 13.3125 2.16463 13.4966 2.37325 13.6482C2.65034 13.8494 3.01764 13.9779 3.65076 14.0465C3.81478 14.0642 3.99127 14.0774 4.1828 14.0873V1.91165Z" fill="currentColor"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Кнопка нового чата -->
+            <div class="new-chat-button" id="newChatBtnSidebar">
+                <div class="ds-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M8 0.599609C3.91309 0.599609 0.599609 3.91309 0.599609 8C0.599609 9.13376 0.855461 10.2098 1.3125 11.1719L1.5918 11.7588L2.76562 11.2012L2.48633 10.6143C2.11034 9.82278 1.90039 8.93675 1.90039 8C1.90039 4.63106 4.63106 1.90039 8 1.90039C11.3689 1.90039 14.0996 4.63106 14.0996 8C14.0996 11.3689 11.3689 14.0996 8 14.0996C7.31041 14.0996 6.80528 14.0514 6.35742 13.9277C5.91623 13.8059 5.49768 13.6021 4.99707 13.2529C4.26492 12.7422 3.21611 12.5616 2.35156 13.1074L2.33789 13.1162L2.32422 13.126L1.58789 13.6436L2.01953 14.9297L3.0459 14.207C3.36351 14.0065 3.83838 14.0294 4.25293 14.3184C4.84547 14.7317 5.39743 15.011 6.01172 15.1807C6.61947 15.3485 7.25549 15.4004 8 15.4004C12.0869 15.4004 15.4004 12.0869 15.4004 8C15.4004 3.91309 12.0869 0.599609 8 0.599609ZM7.34473 4.93945V7.34961H4.93945V8.65039H7.34473V11.0605H8.64551V8.65039H11.0605V7.34961H8.64551V4.93945H7.34473Z" fill="currentColor"/>
+                    </svg>
+                </div>
+                <span>Новый чат</span>
+            </div>
+
+            <div class="settings-section">
+                <div class="settings-title">Тема</div>
+                <div class="theme-buttons">
+                    <button class="theme-btn active" data-theme="light">Светлая</button>
+                    <button class="theme-btn" data-theme="dark">Тёмная</button>
+                </div>
+                <div class="settings-title">Язык</div>
+                <div class="language-buttons">
+                    <button class="lang-btn active" data-lang="ru">Русский</button>
+                    <button class="lang-btn" data-lang="en">English</button>
+                    <button class="lang-btn" data-lang="fr">Français</button>
+                    <button class="lang-btn" data-lang="zh">中文</button>
+                </div>
+            </div>
+            
+            <div class="chat-history" id="chatHistory"></div>
+        </div>
+
+        <!-- Основной экран -->
+        <div class="main-content">
+            <div class="main-header">
+                <!-- КНОПКА ОТКРЫТИЯ (ТА ЖЕ ГЛУБОКАЯ ИКОНКА, id="openMenuBtn") -->
+                <div class="sidebar-menu-btn" id="openMenuBtn">
+                    <div class="ds-icon">
+                        <svg width="18" height="18" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M9.67272 0.522827C10.8339 0.522827 11.76 0.522701 12.4963 0.60248C13.2453 0.683644 13.8789 0.854235 14.4264 1.25196C14.7504 1.48738 15.0355 1.77246 15.2709 2.09648C15.6686 2.64392 15.8392 3.27756 15.9204 4.02653C16.0002 4.76289 16 5.68894 16 6.85013V9.14985C16 10.311 16.0002 11.2371 15.9204 11.9734C15.8392 12.7224 15.6686 13.3561 15.2709 13.9035C15.0355 14.2275 14.7504 14.5126 14.4264 14.748C13.8789 15.1457 13.2453 15.3163 12.4963 15.3975C11.76 15.4773 10.8339 15.4772 9.67272 15.4772H6.3273C5.16611 15.4772 4.24006 15.4773 3.50371 15.3975C2.75474 15.3163 2.1211 15.1457 1.57366 14.748C1.24963 14.5126 0.964549 14.2275 0.729131 13.9035C0.331407 13.3561 0.160817 12.7224 0.0796529 11.9734C-0.000126137 11.2371 1.25338e-09 10.311 1.25338e-09 9.14985V6.85013C1.25329e-09 5.68894 -0.000126137 4.76289 0.0796529 4.02653C0.160817 3.27756 0.331407 2.64392 0.729131 2.09648C0.964549 1.77246 1.24963 1.48738 1.57366 1.25196C2.1211 0.854235 2.75474 0.683644 3.50371 0.60248C4.24006 0.522701 5.16611 0.522827 6.3273 0.522827H9.67272ZM5.54303 1.88714V14.1118C5.78636 14.1128 6.04709 14.1169 6.3273 14.1169H9.67272C10.8639 14.1169 11.7032 14.1164 12.3493 14.0465C12.9824 13.9779 13.3497 13.8494 13.6268 13.6482C13.8354 13.4966 14.0195 13.3125 14.1711 13.1039C14.3723 12.8268 14.5007 12.4595 14.5693 11.8264C14.6393 11.1803 14.6398 10.341 14.6398 9.14985V6.85013C14.6398 5.65895 14.6393 4.81965 14.5693 4.17359C14.5007 3.54047 14.3723 3.17317 14.1711 2.89608C14.0195 2.68746 13.8354 2.50335 13.6268 2.35178C13.3497 2.15059 12.9824 2.02211 12.3493 1.95352C11.7032 1.88356 10.8639 1.88305 9.67272 1.88305H6.3273C6.04709 1.88305 5.78636 1.88618 5.54303 1.88714ZM4.1828 1.91165C3.99125 1.92158 3.8148 1.93575 3.65076 1.95352C3.01764 2.02211 2.65034 2.15059 2.37325 2.35178C2.16463 2.50335 1.98052 2.68746 1.82895 2.89608C1.62776 3.17317 1.49928 3.54047 1.43069 4.17359C1.36074 4.81965 1.36023 5.65895 1.36023 6.85013V9.14985C1.36023 10.341 1.36074 11.1803 1.43069 11.8264C1.49928 12.4595 1.62776 12.8268 1.82895 13.1039C1.98052 13.3125 2.16463 13.4966 2.37325 13.6482C2.65034 13.8494 3.01764 13.9779 3.65076 14.0465C3.81478 14.0642 3.99127 14.0774 4.1828 14.0873V1.91165Z" fill="currentColor"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="main-title">NeuroIrk</div>
+            </div>
+
+            <div class="chat-container" id="chatContainer"></div>
+
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <textarea class="input-area" id="userInput" placeholder="Задайте вопрос..." rows="1"></textarea>
+                    <div class="send-button" id="sendBtn">
+                        <div class="ds-icon">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M8.3125 0.981587C8.66767 1.0545 8.97902 1.20558 9.2627 1.43374C9.48724 1.61438 9.73029 1.85933 9.97949 2.10854L14.707 6.83608L13.293 8.25014L9 3.95717V15.0431H7V3.95717L2.70703 8.25014L1.29297 6.83608L6.02051 2.10854C6.26971 1.85933 6.51277 1.61438 6.7373 1.43374C6.97662 1.24126 7.28445 1.04542 7.6875 0.981587C7.8973 0.94841 8.1031 0.956564 8.3125 0.981587Z" fill="currentColor"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer">
+                NeuroIrk — Иркутск Нейросеть | 2026
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== ПОЛНАЯ БАЗА ЗНАНИЙ ==========
+        const knowledgeBase = {
+            ru: {
+                "привет": [
+                    "Привет! Чем могу помочь?",
+                    "Здравствуйте! Спрашивайте",
+                    "Добрый день! Я здесь"
+                ],
+                "как дела": [
+                    "Отлично! А у вас?",
+                    "Всё хорошо, спасибо",
+                    "Работаю в штатном режиме"
+                ],
+                "иркутск": [
+                    "Иркутск – город в Восточной Сибири, административный центр Иркутской области. Основан в 1661 году. Население около 600 тыс. человек. Расположен на реке Ангаре, в 70 км от озера Байкал. Крупный научный, образовательный и культурный центр.",
+                    "Иркутск – один из старейших городов Сибири, основан как острог. Сегодня это современный мегаполис с развитой инфраструктурой, множеством вузов и достопримечательностей.",
+                    "Иркутск часто называют «воротами к Байкалу». Город славится деревянным зодчеством, музеями, театрами и уникальной историей."
+                ],
+                "гимназия 2": [
+                    "Гимназия №2 основана в 1997 году. Адрес: Университетский, 85. Директор – Рублевский Д.В."
+                ],
+                "байкал": [
+                    "Озеро Байкал — самое глубокое озеро на планете. Находится в 70 км от Иркутска. Содержит 20% мировых запасов пресной воды."
+                ]
+            },
+            en: {
+                "hello": [
+                    "Hello! How can I help?",
+                    "Hi there! Ask me anything"
+                ],
+                "irkutsk": [
+                    "Irkutsk was founded in 1661. Population about 600,000.",
+                    "City on the Angara River, 70 km from Lake Baikal."
+                ],
+                "gymnasium 2": [
+                    "Gymnasium No. 2 founded in 1997. Address: Universitetsky, 85. Director: D. Rublevsky."
+                ],
+                "baikal": [
+                    "Lake Baikal is the deepest lake on Earth. It contains 20% of the world's fresh water."
+                ]
+            },
+            fr: {
+                "bonjour": [
+                    "Bonjour! Comment puis-je vous aider?",
+                    "Salut! Demandez-moi"
+                ],
+                "irkoutsk": [
+                    "Irkoutsk a été fondée en 1661. Population d'environ 600 000 habitants."
+                ],
+                "baikal": [
+                    "Le lac Baïkal est le lac le plus profond du monde. Il contient 20% des réserves d'eau douce."
+                ]
+            },
+            zh: {
+                "你好": [
+                    "你好！需要帮助吗？",
+                    "嗨！随便问"
+                ],
+                "伊尔库茨克": [
+                    "伊尔库茨克成立于1661年。人口约60万。"
+                ],
+                "贝加尔湖": [
+                    "贝加尔湖是世界上最深的湖泊。它拥有世界淡水储量的20%。"
+                ]
+            }
+        };
+
+        // ========== НАСТРОЙКИ ==========
+        let currentLanguage = 'ru';
+        let currentTheme = 'light';
+        let currentChatId = Date.now().toString();
+        let chatHistory = JSON.parse(localStorage.getItem('neuroirk_history') || '{}');
+        let activeDeleteMenu = null;
+
+        const texts = {
+            ru: { newChat: 'Новый чат', placeholder: 'Задайте вопрос...', today: 'Сегодня', yesterday: 'Вчера', daysAgo: 'дней назад', welcome: 'Привет! Я NeuroIrk – нейросеть, знающая всё об Иркутске и науках. Спроси меня о чём угодно!', deleteConfirm: 'Удалить чат?', yes: 'Да', no: 'Нет' },
+            en: { newChat: 'New chat', placeholder: 'Ask a question...', today: 'Today', yesterday: 'Yesterday', daysAgo: 'days ago', welcome: 'Hi! I am NeuroIrk – a neural network that knows everything about Irkutsk and sciences. Ask me anything!', deleteConfirm: 'Delete chat?', yes: 'Yes', no: 'No' },
+            fr: { newChat: 'Nouveau chat', placeholder: 'Posez une question...', today: "Aujourd'hui", yesterday: 'Hier', daysAgo: 'jours', welcome: 'Salut ! Je suis NeuroIrk – un réseau neuronal qui sait tout sur Irkoutsk et les sciences. Demande-moi n\'importe quoi !', deleteConfirm: 'Supprimer la conversation?', yes: 'Oui', no: 'Non' },
+            zh: { newChat: '新聊天', placeholder: '提问...', today: '今天', yesterday: '昨天', daysAgo: '天前', welcome: '嗨！我是NeuroIrk – 了解伊尔库茨克和科学的神经网络。随便问我什么！', deleteConfirm: '删除对话？', yes: '是', no: '否' }
+        };
+
+        function formatDate(date) {
+            const d = new Date(date);
+            const now = new Date();
+            const diff = now - d;
+            const days = Math.floor(diff / (1000*60*60*24));
+            if (days === 0) return texts[currentLanguage].today;
+            if (days === 1) return texts[currentLanguage].yesterday;
+            if (days < 7) return `${days} ${texts[currentLanguage].daysAgo}`;
+            return d.toLocaleDateString(currentLanguage);
+        }
+
+        function setTheme(theme) {
+            currentTheme = theme;
+            document.documentElement.classList.toggle('dark', theme === 'dark');
+            document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.theme-btn[data-theme="${theme}"]`).classList.add('active');
+            localStorage.setItem('neuroirk_theme', theme);
+        }
+
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.lang-btn[data-lang="${lang}"]`).classList.add('active');
+            document.getElementById('userInput').placeholder = texts[lang].placeholder;
+            document.querySelector('#newChatBtnSidebar span').textContent = texts[lang].newChat;
+            localStorage.setItem('neuroirk_language', lang);
+            
+            const container = document.getElementById('chatContainer');
+            if (container.children.length === 1) {
+                container.innerHTML = '';
+                addMessage(texts[lang].welcome, false);
+            }
+        }
+
+        function updateHistoryList() {
+            const list = document.getElementById('chatHistory');
+            list.innerHTML = '';
+            const chats = Object.values(chatHistory).sort((a,b) => new Date(b.date) - new Date(a.date));
+            chats.forEach(chat => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.innerHTML = `
+                    <span style="flex:1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${chat.title}</span>
+                    <span class="history-date">${formatDate(chat.date)}</span>
+                    <button class="delete-btn" data-id="${chat.id}">⋮</button>
+                `;
+                div.onclick = (e) => {
+                    if (e.target.classList.contains('delete-btn')) return;
+                    loadChat(chat.id);
+                    closeSidebar();
+                };
+                div.querySelector('.delete-btn').onclick = (e) => {
+                    e.stopPropagation();
+                    showDeleteConfirm(chat.id, e.target);
+                };
+                list.appendChild(div);
+            });
+        }
+
+        function showDeleteConfirm(chatId, btn) {
+            if (activeDeleteMenu) activeDeleteMenu.remove();
+            
+            const rect = btn.getBoundingClientRect();
+            const div = document.createElement('div');
+            div.className = 'delete-confirm';
+            div.style.top = rect.bottom + 5 + 'px';
+            div.style.left = Math.min(rect.left - 150, window.innerWidth - 210) + 'px';
+            div.innerHTML = `
+                <p>${texts[currentLanguage].deleteConfirm}</p>
+                <div class="delete-confirm-buttons">
+                    <button class="delete-confirm-btn delete-confirm-yes">${texts[currentLanguage].yes}</button>
+                    <button class="delete-confirm-btn delete-confirm-no">${texts[currentLanguage].no}</button>
+                </div>
+            `;
+            
+            document.body.appendChild(div);
+            activeDeleteMenu = div;
+            
+            div.querySelector('.delete-confirm-yes').onclick = () => {
+                deleteChat(chatId);
+                div.remove();
+                activeDeleteMenu = null;
+            };
+            
+            div.querySelector('.delete-confirm-no').onclick = () => {
+                div.remove();
+                activeDeleteMenu = null;
+            };
+        }
+
+        function deleteChat(id) {
+            delete chatHistory[id];
+            localStorage.setItem('neuroirk_history', JSON.stringify(chatHistory));
+            if (id === currentChatId) newChat();
+            else updateHistoryList();
+        }
+
+        function loadChat(id) {
+            const chat = chatHistory[id];
+            if (!chat) return;
+            currentChatId = id;
+            const container = document.getElementById('chatContainer');
+            container.innerHTML = '';
+            chat.messages.forEach(msg => {
+                addMessage(msg.question, true);
+                addMessage(msg.answer, false);
+            });
+        }
+
+        function saveChat(question, answer) {
+            if (!chatHistory[currentChatId]) {
+                chatHistory[currentChatId] = {
+                    id: currentChatId,
+                    title: question.substring(0,30) + (question.length > 30 ? '...' : ''),
+                    date: new Date().toISOString(),
+                    messages: []
+                };
+            } else {
+                chatHistory[currentChatId].date = new Date().toISOString();
+            }
+            chatHistory[currentChatId].messages.push({ question, answer });
+            updateHistoryList();
+            localStorage.setItem('neuroirk_history', JSON.stringify(chatHistory));
+        }
+
+        function newChat() {
+            currentChatId = Date.now().toString();
+            document.getElementById('chatContainer').innerHTML = '';
+            addMessage(texts[currentLanguage].welcome, false);
+            closeSidebar();
+        }
+
+        function addMessage(text, isUser) {
+            const div = document.createElement('div');
+            div.className = 'message';
+            div.innerHTML = `
+                <div class="message-avatar ${isUser ? 'user-avatar' : 'bot-avatar'}">${isUser ? '👤' : 'AI'}</div>
+                <div class="message-content"><div class="message-text">${text}</div></div>
+            `;
+            document.getElementById('chatContainer').appendChild(div);
+            div.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function findBestAnswer(question) {
+            const q = question.toLowerCase().trim();
+            const langData = knowledgeBase[currentLanguage] || knowledgeBase.ru;
+            let bestKey = null;
+            let bestScore = 0;
+            
+            for (let key in langData) {
+                if (q.includes(key.toLowerCase()) && key.length > bestScore) {
+                    bestScore = key.length;
+                    bestKey = key;
+                }
+            }
+            
+            if (bestKey && langData[bestKey].length > 0) {
+                const answers = langData[bestKey];
+                return answers[Math.floor(Math.random() * answers.length)];
+            }
+            
+            return "Интересный вопрос! Попробуйте уточнить.";
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('userInput');
+            const question = input.value.trim();
+            const sendBtn = document.getElementById('sendBtn');
+            
+            if (!question || sendBtn.classList.contains('disabled')) return;
+            
+            sendBtn.classList.add('disabled');
+            addMessage(question, true);
+            input.value = '';
+            input.style.height = 'auto';
+
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message';
+            loadingDiv.innerHTML = `
+                <div class="message-avatar bot-avatar">AI</div>
+                <div class="message-content">
+                    <div class="loading">
+                        <div class="loading-dots">
+                            <span></span><span></span><span></span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('chatContainer').appendChild(loadingDiv);
+            loadingDiv.scrollIntoView({ behavior: 'smooth' });
+
+            setTimeout(() => {
+                loadingDiv.remove();
+                const answer = findBestAnswer(question);
+                addMessage(answer, false);
+                saveChat(question, answer);
+                sendBtn.classList.remove('disabled');
+            }, 1500);
+        }
+
+        function openSidebar() {
+            document.getElementById('sidebar').classList.add('open');
+            document.getElementById('overlay').classList.add('active');
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('overlay').classList.remove('active');
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            updateHistoryList();
+            
+            const savedTheme = localStorage.getItem('neuroirk_theme') || 'light';
+            const savedLang = localStorage.getItem('neuroirk_language') || 'ru';
+            
+            setTheme(savedTheme);
+            setLanguage(savedLang);
+            newChat();
+
+            // ВАЖНО: правильные ID для кнопок
+            document.getElementById('openMenuBtn').onclick = openSidebar;
+            document.getElementById('closeSidebarBtn').onclick = closeSidebar;
+            document.getElementById('overlay').onclick = closeSidebar;
+            document.getElementById('newChatBtnSidebar').onclick = newChat;
+            document.getElementById('sendBtn').onclick = sendMessage;
+            
+            document.getElementById('userInput').onkeydown = (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            };
+            
+            document.getElementById('userInput').oninput = function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            };
+
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.onclick = () => setTheme(btn.dataset.theme);
+            });
+            
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.onclick = () => setLanguage(btn.dataset.lang);
+            });
+
+            // Для надежности добавим обработчики через addEventListener еще раз
+            console.log('Приложение загружено, кнопки должны работать');
+        });
+    </script>
+</body>
+</html>
