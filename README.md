@@ -1,0 +1,2 @@
+# neuroirk
+neuroirk нейросеть иркутск
